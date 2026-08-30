@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>課堂翻譯 · 學生端</title>
+<title>課堂翻譯 · Student / 學生端</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;600;700&display=swap">
 <style>
   :root {
@@ -71,6 +71,54 @@
     box-shadow: 0 2px 12px rgba(6,182,212,.35);
   }
 
+  /* ── How-to banner ── */
+  .howto {
+    width: 100%; max-width: 660px;
+    background: linear-gradient(135deg, rgba(6,182,212,.08), rgba(59,130,246,.08));
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .howto-title {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 800;
+    color: var(--blue);
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  .howto-step {
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+
+  .howto-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--grad-main);
+    color: #fff;
+    font-family: var(--display);
+    font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .howto-text {
+    font-size: 13px; line-height: 1.5; color: var(--text);
+  }
+
+  .howto-text strong {
+    color: var(--blue);
+  }
+
+  .howto-text .en {
+    display: block;
+    font-size: 12px; color: var(--muted);
+    margin-top: 1px;
+  }
+
   /* ── Main card ── */
   .card {
     width: 100%; max-width: 660px;
@@ -109,7 +157,7 @@
   h1 {
     font-family: var(--display);
     font-size: 22px; font-weight: 800;
-    color: var(--text); margin-bottom: 8px; text-wrap: balance;
+    color: var(--text); margin-bottom: 4px; text-wrap: balance;
   }
 
   h1 span {
@@ -119,8 +167,20 @@
     background-clip: text;
   }
 
+  .h1-en {
+    font-family: var(--display);
+    font-size: 14px; font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
   .subtitle {
     font-size: 14px; color: var(--muted);
+    font-weight: 600; margin-bottom: 4px;
+  }
+
+  .subtitle-en {
+    font-size: 12px; color: var(--faint);
     font-weight: 600; margin-bottom: 24px;
   }
 
@@ -166,19 +226,22 @@
   .lang-flag { font-size: 28px; }
 
   .join-btn {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px;
     padding: 14px 40px;
     border-radius: 30px;
     background: var(--grad-main);
     border: none;
     color: #fff;
     font-family: var(--display);
-    font-size: 16px;
-    font-weight: 800;
     cursor: pointer;
     box-shadow: 0 6px 20px rgba(59,130,246,.35);
     transition: transform .15s, box-shadow .15s;
     letter-spacing: .03em;
   }
+
+  .join-btn .btn-zh { font-size: 16px; font-weight: 800; }
+  .join-btn .btn-en { font-size: 11px; font-weight: 600; opacity: .85; }
 
   .join-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(59,130,246,.45); }
   .join-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
@@ -201,6 +264,12 @@
     font-size: 16px; font-weight: 800;
     color: var(--text);
     display: flex; align-items: center; gap: 8px;
+  }
+
+  .live-title-sub {
+    font-family: var(--display);
+    font-size: 10px; font-weight: 600;
+    color: var(--muted); display: block;
   }
 
   .live-indicator {
@@ -255,7 +324,11 @@
   .feed-placeholder-text {
     font-family: var(--display);
     font-size: 14px; font-weight: 700;
-    color: var(--faint); line-height: 1.5;
+    color: var(--faint); line-height: 1.8;
+  }
+
+  .feed-placeholder-text .en {
+    font-size: 12px; font-weight: 600;
   }
 
   /* Translation cards */
@@ -324,7 +397,11 @@
     font-size: 13px; font-weight: 700;
     color: var(--muted);
     display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
   }
+
+  .tts-label-text { display: flex; flex-direction: column; gap: 1px; }
+  .tts-label-text .en { font-size: 10px; font-weight: 600; color: var(--faint); }
 
   .toggle {
     position: relative; width: 44px; height: 24px;
@@ -363,8 +440,37 @@
 <body>
 
 <div class="topbar">
-  <div class="logo">✦ 課堂即時翻譯</div>
-  <div class="role-chip">📖 學生端</div>
+  <div class="logo">✦ 課堂即時翻譯 · Classroom Live Translation</div>
+  <div class="role-chip">📖 Student 學生</div>
+</div>
+
+<!-- How-to banner -->
+<div class="howto">
+  <div class="howto-title">📋 使用說明 · How to use</div>
+
+  <div class="howto-step">
+    <div class="howto-num">1</div>
+    <div class="howto-text">
+      <strong>選擇你的語言</strong>，然後點「加入」<br>
+      <span class="en">Select your language below, then tap <em>Join</em></span>
+    </div>
+  </div>
+
+  <div class="howto-step">
+    <div class="howto-num">2</div>
+    <div class="howto-text">
+      <strong>等老師開始說話</strong>，翻譯會自動出現<br>
+      <span class="en">Wait for the teacher to speak — translations appear automatically</span>
+    </div>
+  </div>
+
+  <div class="howto-step">
+    <div class="howto-num">3</div>
+    <div class="howto-text">
+      可以開啟<strong>語音朗讀</strong>，讓翻譯自動唸出來<br>
+      <span class="en">Optionally enable <em>Text-to-Speech</em> to hear translations aloud</span>
+    </div>
+  </div>
 </div>
 
 <div class="card">
@@ -373,7 +479,9 @@
   <div class="step-lang" id="langStep">
     <span class="header-deco">🌍</span>
     <h1>選擇你的<span>母語</span></h1>
+    <div class="h1-en">Choose your language</div>
     <p class="subtitle">老師說話，你就能看到你選的語言翻譯 ✨</p>
+    <p class="subtitle-en">When your teacher speaks, you will see the translation in your language.</p>
 
     <div class="lang-grid" id="langGrid">
       <button class="lang-btn" data-lang="zh-TW"><span class="lang-flag">🇹🇼</span>繁體中文</button>
@@ -387,7 +495,10 @@
       <button class="lang-btn" data-lang="es"   ><span class="lang-flag">🇪🇸</span>Español</button>
     </div>
 
-    <button class="join-btn" id="joinBtn" disabled>選擇語言後加入 →</button>
+    <button class="join-btn" id="joinBtn" disabled>
+      <span class="btn-zh">選擇語言後加入 →</span>
+      <span class="btn-en">Select a language, then join →</span>
+    </button>
   </div>
 
   <!-- Live feed (shown after join) -->
@@ -395,11 +506,14 @@
     <div class="live-header">
       <div class="live-title">
         <span>🎧</span>
-        <span>即時翻譯</span>
+        <span>
+          即時翻譯
+          <span class="live-title-sub">Live Translation</span>
+        </span>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <div class="live-indicator">
-          <span class="live-dot"></span>即時接收中
+          <span class="live-dot"></span>即時接收中 · Receiving
         </div>
         <div class="lang-badge" id="currentLangBadge">—</div>
       </div>
@@ -408,14 +522,23 @@
     <div class="feed-area">
       <div class="feed-placeholder" id="feedPlaceholder">
         <div class="feed-placeholder-icon">🌸</div>
-        <div class="feed-placeholder-text">等待老師開始說話…<br>翻譯會即時出現在這裡 ✦</div>
+        <div class="feed-placeholder-text">
+          等待老師開始說話…<br>
+          <span class="en">Waiting for teacher to start speaking…</span>
+          翻譯會即時出現在這裡 ✦<br>
+          <span class="en">Translations will appear here in real time.</span>
+        </div>
       </div>
       <div class="feed" id="feed"></div>
     </div>
 
     <div class="tts-row">
       <label class="tts-label">
-        🔊 語音朗讀
+        🔊
+        <span class="tts-label-text">
+          <span>語音朗讀</span>
+          <span class="en">Text-to-Speech</span>
+        </span>
         <label class="toggle">
           <input type="checkbox" id="ttsToggle">
           <span class="toggle-track"></span>
@@ -505,7 +628,7 @@
     const card = document.createElement('div');
     card.className = 'trans-card';
     card.innerHTML = `
-      <div class="trans-original">原文 <span>${original}</span></div>
+      <div class="trans-original">原文 / Original <span>${original}</span></div>
       <div class="trans-text">${translated}</div>
     `;
     feed.prepend(card);
