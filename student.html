@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂翻譯 · Student / 學生端</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Nunito:wght@400;600;700&display=swap">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- 課堂翻譯設定 -->
+<script src="config.js"></script>
+<style>
+  :root {
+    --bg:        #F0FBFF;
+    --surface:   #FFFFFF;
+    --surface2:  #F5FDFF;
+    --border:    #BAE6FF;
+    --text:      #0C2D4A;
+    --muted:     #5B97CC;
+    --faint:     #DBEEFF;
+
+    --blue:      #3B82F6;
+    --cyan:      #06B6D4;
+    --purple:    #8B5CF6;
+    --mint:      #10B981;
+    --pink:      #EC4899;
+    --yellow:    #F59E0B;
+
+    --grad-main: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+    --grad-purple: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+    --grad-mint: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+
+    --display: 'M PLUS Rounded 1c', 'Helvetica Neue', sans-serif;
+    --body:    'Nunito', 'Helvetica Neue', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(6,182,212,.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(59,130,246,.1) 0%, transparent 50%);
+    color: var(--text);
+    font-family: var(--body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 60px;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    width: 100%; max-width: 660px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-family: var(--display);
+    font-size: 15px; font-weight: 800;
+    background: var(--grad-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .role-chip {
+    font-family: var(--display);
+    font-size: 12px; font-weight: 700;
+    padding: 5px 14px; border-radius: 20px;
+    background: var(--grad-main);
+    color: #fff; letter-spacing: .04em;
+    box-shadow: 0 2px 12px rgba(6,182,212,.35);
+  }
+
+  /* ── How-to banner ── */
+  .howto {
+    width: 100%; max-width: 660px;
+    background: linear-gradient(135deg, rgba(6,182,212,.08), rgba(59,130,246,.08));
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .howto-title {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 800;
+    color: var(--blue);
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  .howto-step {
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+
+  .howto-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--grad-main);
+    color: #fff;
+    font-family: var(--display);
+    font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .howto-text {
+    font-size: 13px; line-height: 1.5; color: var(--text);
+  }
+
+  .howto-text strong {
+    color: var(--blue);
+  }
+
+  .howto-text .en {
+    display: block;
+    font-size: 12px; color: var(--muted);
+    margin-top: 1px;
+  }
+
+  /* ── Main card ── */
+  .card {
+    width: 100%; max-width: 660px;
+    background: var(--surface);
+    border-radius: 24px;
+    border: 2px solid var(--border);
+    box-shadow: 0 8px 40px rgba(59,130,246,.12);
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    display: block; height: 6px;
+    background: var(--grad-main);
+  }
+
+  /* ── Step 1: Language select ── */
+  .step-lang {
+    padding: 32px 32px 28px;
+    border-bottom: 2px solid var(--faint);
+    text-align: center;
+  }
+
+  .step-lang .header-deco {
+    font-size: 42px;
+    animation: float 3s ease-in-out infinite;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: 22px; font-weight: 800;
+    color: var(--text); margin-bottom: 4px; text-wrap: balance;
+  }
+
+  h1 span {
+    background: var(--grad-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .h1-en {
+    font-family: var(--display);
+    font-size: 14px; font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 14px; color: var(--muted);
+    font-weight: 600; margin-bottom: 4px;
+  }
+
+  .subtitle-en {
+    font-size: 12px; color: var(--faint);
+    font-weight: 600; margin-bottom: 24px;
+  }
+
+  /* Language grid */
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .lang-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 10px;
+    border-radius: 16px;
+    border: 2px solid var(--faint);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all .15s;
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .lang-btn:hover {
+    border-color: var(--cyan);
+    color: var(--blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6,182,212,.2);
+  }
+
+  .lang-btn.selected {
+    background: linear-gradient(135deg,rgba(6,182,212,.12),rgba(59,130,246,.12));
+    border-color: var(--cyan);
+    color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(6,182,212,.2);
+  }
+
+  .lang-flag { font-size: 28px; }
+
+  .join-btn {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px;
+    padding: 14px 40px;
+    border-radius: 30px;
+    background: var(--grad-main);
+    border: none;
+    color: #fff;
+    font-family: var(--display);
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(59,130,246,.35);
+    transition: transform .15s, box-shadow .15s;
+    letter-spacing: .03em;
+  }
+
+  .join-btn .btn-zh { font-size: 16px; font-weight: 800; }
+  .join-btn .btn-en { font-size: 11px; font-weight: 600; opacity: .85; }
+
+  .join-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(59,130,246,.45); }
+  .join-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ── Live feed (after join) ── */
+  .live-section { display: none; }
+
+  .live-header {
+    padding: 20px 32px;
+    border-bottom: 2px solid var(--faint);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .live-title {
+    font-family: var(--display);
+    font-size: 16px; font-weight: 800;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .live-title-sub {
+    font-family: var(--display);
+    font-size: 10px; font-weight: 600;
+    color: var(--muted); display: block;
+  }
+
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--display);
+    font-size: 12px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px;
+    background: rgba(16,185,129,.12);
+    border: 1.5px solid rgba(16,185,129,.3);
+    color: var(--mint);
+  }
+
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--mint);
+    animation: blink .8s ease infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .2; }
+  }
+
+  .lang-badge {
+    font-family: var(--display);
+    font-size: 12px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px;
+    background: linear-gradient(135deg,rgba(139,92,246,.12),rgba(236,72,153,.12));
+    border: 1.5px solid rgba(139,92,246,.3);
+    color: var(--purple);
+  }
+
+  /* Feed area */
+  .feed-area {
+    padding: 24px 32px;
+    min-height: 280px;
+    position: relative;
+  }
+
+  .feed-placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px; color: var(--faint);
+    pointer-events: none; transition: opacity .3s;
+    text-align: center;
+  }
+
+  .feed-placeholder-icon { font-size: 44px; animation: float 4s ease-in-out infinite; }
+  .feed-placeholder-text {
+    font-family: var(--display);
+    font-size: 14px; font-weight: 700;
+    color: var(--faint); line-height: 1.8;
+  }
+
+  .feed-placeholder-text .en {
+    font-size: 12px; font-weight: 600;
+  }
+
+  /* Translation cards */
+  .feed { display: flex; flex-direction: column; gap: 12px; }
+
+  .trans-card {
+    background: var(--surface2);
+    border: 2px solid var(--faint);
+    border-radius: 0 18px 18px 18px;
+    padding: 14px 18px;
+    position: relative;
+    animation: pop-in .28s cubic-bezier(.34,1.56,.64,1) both;
+  }
+
+  .trans-card::before {
+    content: '';
+    position: absolute; top: -2px; left: -14px;
+    width: 12px; height: 12px;
+    clip-path: polygon(100% 0, 100% 100%, 0 0);
+  }
+
+  .trans-card:nth-child(3n+1) { border-top: 4px solid var(--cyan); }
+  .trans-card:nth-child(3n+1)::before { background: var(--cyan); }
+  .trans-card:nth-child(3n+2) { border-top: 4px solid var(--purple); }
+  .trans-card:nth-child(3n+2)::before { background: var(--purple); }
+  .trans-card:nth-child(3n)   { border-top: 4px solid var(--mint); }
+  .trans-card:nth-child(3n)::before { background: var(--mint); }
+
+  .trans-original {
+    font-size: 12px; font-weight: 700;
+    color: var(--muted); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .trans-original span {
+    background: var(--faint); padding: 2px 8px;
+    border-radius: 6px; font-family: 'Courier New', monospace;
+  }
+
+  .trans-text {
+    font-family: var(--display);
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  @keyframes pop-in {
+    from { opacity: 0; transform: scale(.9) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* TTS toggle */
+  .tts-row {
+    padding: 14px 32px;
+    border-top: 2px solid var(--faint);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tts-label {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 700;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+  }
+
+  .tts-label-text { display: flex; flex-direction: column; gap: 1px; }
+  .tts-label-text .en { font-size: 10px; font-weight: 600; color: var(--faint); }
+
+  .toggle {
+    position: relative; width: 44px; height: 24px;
+    cursor: pointer; display: inline-block;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--faint); border-radius: 20px;
+    transition: background .2s;
+  }
+
+  .toggle-track::before {
+    content: '';
+    position: absolute; width: 18px; height: 18px;
+    border-radius: 50%; background: #fff;
+    top: 3px; left: 3px;
+    transition: transform .2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  }
+
+  .toggle input:checked + .toggle-track { background: var(--grad-mint); }
+  .toggle input:checked + .toggle-track::before { transform: translateX(20px); }
+
+  .session-chip {
+    font-family: var(--display);
+    font-size: 12px; font-weight: 700;
+    color: var(--muted);
+    background: var(--faint);
+    padding: 4px 12px; border-radius: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">✦ 課堂即時翻譯 · Classroom Live Translation</div>
+  <div class="role-chip">📖 Student 學生</div>
+</div>
+
+<!-- How-to banner -->
+<div class="howto">
+  <div class="howto-title">📋 使用說明 · How to use</div>
+
+  <div class="howto-step">
+    <div class="howto-num">1</div>
+    <div class="howto-text">
+      <strong>選擇你的語言</strong>，然後點「加入」<br>
+      <span class="en">Select your language below, then tap <em>Join</em></span>
+    </div>
+  </div>
+
+  <div class="howto-step">
+    <div class="howto-num">2</div>
+    <div class="howto-text">
+      <strong>等老師開始說話</strong>，翻譯會自動出現<br>
+      <span class="en">Wait for the teacher to speak — translations appear automatically</span>
+    </div>
+  </div>
+
+  <div class="howto-step">
+    <div class="howto-num">3</div>
+    <div class="howto-text">
+      可以開啟<strong>語音朗讀</strong>，讓翻譯自動唸出來<br>
+      <span class="en">Optionally enable <em>Text-to-Speech</em> to hear translations aloud</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- Step 1: Choose language -->
+  <div class="step-lang" id="langStep">
+    <span class="header-deco">🌍</span>
+    <h1>選擇你的<span>母語</span></h1>
+    <div class="h1-en">Choose your language</div>
+    <p class="subtitle">老師說話，你就能看到你選的語言翻譯 ✨</p>
+    <p class="subtitle-en">When your teacher speaks, you will see the translation in your language.</p>
+
+    <div class="lang-grid" id="langGrid">
+      <button class="lang-btn" data-lang="zh-TW"><span class="lang-flag">🇹🇼</span>繁體中文</button>
+      <button class="lang-btn" data-lang="zh-CN"><span class="lang-flag">🇨🇳</span>简体中文</button>
+      <button class="lang-btn" data-lang="en"   ><span class="lang-flag">🇺🇸</span>English</button>
+      <button class="lang-btn" data-lang="ja"   ><span class="lang-flag">🇯🇵</span>日本語</button>
+      <button class="lang-btn" data-lang="ko"   ><span class="lang-flag">🇰🇷</span>한국어</button>
+      <button class="lang-btn" data-lang="vi"   ><span class="lang-flag">🇻🇳</span>Tiếng Việt</button>
+      <button class="lang-btn" data-lang="id"   ><span class="lang-flag">🇮🇩</span>Indonesia</button>
+      <button class="lang-btn" data-lang="th"   ><span class="lang-flag">🇹🇭</span>ภาษาไทย</button>
+      <button class="lang-btn" data-lang="es"   ><span class="lang-flag">🇪🇸</span>Español</button>
+    </div>
+
+    <button class="join-btn" id="joinBtn" disabled>
+      <span class="btn-zh">選擇語言後加入 →</span>
+      <span class="btn-en">Select a language, then join →</span>
+    </button>
+  </div>
+
+  <!-- Live feed (shown after join) -->
+  <div class="live-section" id="liveSection">
+    <div class="live-header">
+      <div class="live-title">
+        <span>🎧</span>
+        <span>
+          即時翻譯
+          <span class="live-title-sub">Live Translation</span>
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="live-indicator">
+          <span class="live-dot"></span>即時接收中 · Receiving
+        </div>
+        <div class="lang-badge" id="currentLangBadge">—</div>
+      </div>
+    </div>
+
+    <div class="feed-area">
+      <div class="feed-placeholder" id="feedPlaceholder">
+        <div class="feed-placeholder-icon">🌸</div>
+        <div class="feed-placeholder-text">
+          等待老師開始說話…<br>
+          <span class="en">Waiting for teacher to start speaking…</span>
+          翻譯會即時出現在這裡 ✦<br>
+          <span class="en">Translations will appear here in real time.</span>
+        </div>
+      </div>
+      <div class="feed" id="feed"></div>
+    </div>
+
+    <div class="tts-row">
+      <label class="tts-label">
+        🔊
+        <span class="tts-label-text">
+          <span>語音朗讀</span>
+          <span class="en">Text-to-Speech</span>
+        </span>
+        <label class="toggle">
+          <input type="checkbox" id="ttsToggle">
+          <span class="toggle-track"></span>
+        </label>
+      </label>
+      <div class="session-chip" id="sessionChip">Session —</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const params    = new URLSearchParams(location.search);
+  const SESSION_ID = params.get('session') || '??????';
+  let selectedLang = null;
+  let langName = '';
+
+  const LANG_NAMES = {
+    'zh-TW':'繁體中文','zh-CN':'简体中文','en':'English','ja':'日本語',
+    'ko':'한국어','vi':'Tiếng Việt','id':'Indonesia','th':'ภาษาไทย','es':'Español'
+  };
+
+  // Language selection
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedLang = btn.dataset.lang;
+      langName = LANG_NAMES[selectedLang] || selectedLang;
+      document.getElementById('joinBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('joinBtn').addEventListener('click', () => {
+    if (!selectedLang) return;
+    document.getElementById('langStep').style.display = 'none';
+    document.getElementById('liveSection').style.display = 'block';
+    document.getElementById('currentLangBadge').textContent = '🌐 ' + langName;
+    document.getElementById('sessionChip').textContent = 'Session ' + SESSION_ID;
+    connectWebSocket();
+  });
+
+  // ── Firebase 即時接收 ──────────────────────────────
+  function connectWebSocket() {
+    const cfg = (typeof FIREBASE_CONFIG !== 'undefined') ? FIREBASE_CONFIG : null;
+    const ready = cfg && cfg.databaseURL && !cfg.databaseURL.includes('YOUR_PROJECT');
+
+    if (!ready) {
+      // Firebase 未設定：顯示提示
+      showTranslation(
+        '⚠️ Firebase 未設定',
+        'The teacher has not set up Firebase yet. Please ask your teacher to update config.js on GitHub.'
+      );
+      return;
+    }
+
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      const db = firebase.database();
+      const joinTs = Date.now();
+
+      // 學生上線（老師可以看到人數）
+      const studentId = Math.random().toString(36).slice(2, 10);
+      const presRef = db.ref(`classroom/${SESSION_ID}/students/${studentId}`);
+      presRef.set({ lang: selectedLang, ts: joinTs });
+      presRef.onDisconnect().remove();
+
+      // 監聽老師說話的新訊息
+      db.ref(`classroom/${SESSION_ID}/messages`)
+        .on('child_added', async snap => {
+          const { text, ts } = snap.val();
+          // 忽略學生加入前的舊訊息
+          if (ts && ts < joinTs - 500) return;
+          const translated = await translateText(text);
+          showTranslation(text, translated);
+        });
+
+    } catch (e) {
+      showTranslation('連線失敗 / Connection failed', e.message);
+    }
+  }
+
+  // ── MyMemory 免費翻譯 API（無需 API Key）──────────
+  async function translateText(text) {
+    // 如果語言本身是中文，不需翻譯
+    if (selectedLang === 'zh-TW' || selectedLang === 'zh-CN') return text;
+
+    // MyMemory 語言代碼對應
+    const MM_LANG = {
+      'en':    'en-US',
+      'ja':    'ja-JP',
+      'ko':    'ko-KR',
+      'vi':    'vi-VN',
+      'id':    'id-ID',
+      'th':    'th-TH',
+      'es':    'es-ES',
+      'zh-TW': 'zh-TW',
+      'zh-CN': 'zh-CN',
+    };
+    const to = MM_LANG[selectedLang] || selectedLang;
+
+    try {
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh-TW|${to}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.responseStatus === 200) return data.responseData.translatedText;
+      // 每日免費額度（1000 字）用盡時的提示
+      if (data.responseStatus === 429) return `[翻譯額度已滿，請明天再試] ${text}`;
+      return `[翻譯失敗 ${data.responseStatus}] ${text}`;
+    } catch (e) {
+      return `[網路錯誤] ${text}`;
+    }
+  }
+
+  function showTranslation(original, translated) {
+    const placeholder = document.getElementById('feedPlaceholder');
+    const feed = document.getElementById('feed');
+    placeholder.style.opacity = '0';
+
+    const card = document.createElement('div');
+    card.className = 'trans-card';
+    card.innerHTML = `
+      <div class="trans-original">原文 / Original <span>${original}</span></div>
+      <div class="trans-text">${translated}</div>
+    `;
+    feed.prepend(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    if (document.getElementById('ttsToggle').checked && translated) {
+      const u = new SpeechSynthesisUtterance(translated);
+      u.lang = selectedLang;
+      window.speechSynthesis.speak(u);
+    }
+  }
+</script>
+
+</body>
+</html>
